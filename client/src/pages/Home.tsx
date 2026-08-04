@@ -13,7 +13,6 @@ export default function Home() {
   return (
     <div className="container home-page">
       <section className="hero">
-        <span className="hero-eyebrow">Available for new opportunities</span>
         <h1>Hi, I'm Alibek Khakim.</h1>
         <p>I'm a full-stack developer, game developer, and 3D designer building thoughtful web, mobile, and interactive experiences.</p>
         <div className="flex gap-4">
@@ -42,8 +41,8 @@ export default function Home() {
             <section className="tech-group" key={group.title}>
               <h3>{group.title}</h3>
               <div className="tech-badges">
-                {group.skills.map((skill, index) => (
-                  <span className={`tech-badge tech-badge--${index % 6}`} key={skill}>{skill}</span>
+                {group.skills.map((skill) => (
+                  <span className="tech-badge" key={skill}>{skill}</span>
                 ))}
               </div>
             </section>

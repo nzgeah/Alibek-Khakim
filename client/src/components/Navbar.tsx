@@ -3,19 +3,22 @@ import { Moon, Sun } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 export default function Navbar() {
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(true);
 
   useEffect(() => {
     const theme = localStorage.getItem('theme');
-    if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    if (theme !== 'light') {
       document.documentElement.setAttribute('data-theme', 'dark');
       setIsDark(true);
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light');
+      setIsDark(false);
     }
   }, []);
 
   const toggleTheme = () => {
     if (isDark) {
-      document.documentElement.removeAttribute('data-theme');
+      document.documentElement.setAttribute('data-theme', 'light');
       localStorage.setItem('theme', 'light');
       setIsDark(false);
     } else {
