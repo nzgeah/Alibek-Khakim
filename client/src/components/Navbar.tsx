@@ -25,6 +25,11 @@ export default function Navbar() {
     }
   };
 
+  const scrollToConnect = (e: React.MouseEvent) => {
+    e.preventDefault();
+    document.getElementById('connect')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <nav className="navbar container">
       <Link to="/" className="font-bold text-xl" style={{ color: 'var(--primary)' }}>
@@ -34,7 +39,7 @@ export default function Navbar() {
       <div className="nav-links">
         <NavLink to="/" className={({isActive}) => isActive ? 'active' : ''}>Home</NavLink>
         <NavLink to="/projects" className={({isActive}) => isActive ? 'active' : ''}>Projects</NavLink>
-        <NavLink to="/contact" className={({isActive}) => isActive ? 'active' : ''}>Connect</NavLink>
+        <a href="#connect" onClick={scrollToConnect}>Connect</a>
         
         <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
           {isDark ? <Sun size={20} /> : <Moon size={20} />}
