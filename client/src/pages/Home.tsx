@@ -2,8 +2,9 @@
 
 export default function Home() {
   return (
-    <div className="container">
+    <div className="container home-page">
       <section className="hero">
+        <span className="hero-eyebrow">Available for new opportunities</span>
         <h1>Hi, I'm a Full-Stack Developer</h1>
         <p>I build modern, responsive, and performant web applications with a focus on clean design and solid architecture.</p>
         <div className="flex gap-4">
@@ -12,7 +13,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mt-8 mb-8">
+      <section className="about-section mt-8 mb-8">
         <h2>About Me</h2>
         <p className="text-lg mt-4" style={{ maxWidth: '800px' }}>
           I am a passionate developer who loves solving complex problems. 
@@ -24,18 +25,18 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mt-8 mb-8">
+      <section className="skills-section mt-8 mb-8">
         <h2>Skills</h2>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 mt-4">
-          <div className="card">
+          <div className="card skill-card">
             <h3>Frontend</h3>
             <p className="text-muted">React, Vue, TypeScript, CSS3, HTML5</p>
           </div>
-          <div className="card">
+          <div className="card skill-card">
             <h3>Backend</h3>
             <p className="text-muted">Node.js, Express, Python, PostgreSQL</p>
           </div>
-          <div className="card">
+          <div className="card skill-card">
             <h3>Tools</h3>
             <p className="text-muted">Git, Docker, Figma, AWS</p>
           </div>

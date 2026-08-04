@@ -27,13 +27,14 @@ export default function Navbar() {
 
   const scrollToConnect = (e: React.MouseEvent) => {
     e.preventDefault();
+    window.dispatchEvent(new Event('connect-scroll-requested'));
     document.getElementById('connect')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
     <nav className="navbar container">
       <Link to="/" className="font-bold text-xl" style={{ color: 'var(--primary)' }}>
-        MyLogo
+        <span className="logo-mark">&lt;/&gt;</span> MyLogo
       </Link>
       
       <div className="nav-links">
