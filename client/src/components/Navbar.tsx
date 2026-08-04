@@ -34,7 +34,7 @@ export default function Navbar() {
   return (
     <nav className="navbar container">
       <Link to="/" className="font-bold text-xl" style={{ color: 'var(--primary)' }}>
-        <span className="logo-mark">&lt;/&gt;</span> MyLogo
+        <img className="profile-logo" src="/profile-logo.jpg" alt="Profile" />
       </Link>
       
       <div className="nav-links">
