@@ -8,7 +8,7 @@ export default function Home() {
         <p>I build modern, responsive, and performant web applications with a focus on clean design and solid architecture.</p>
         <div className="flex gap-4">
           <a href="/projects" className="btn">View My Work</a>
-          <a href="/contact" className="btn btn-outline">Contact Me</a>
+          <a href="/contact" className="btn btn-outline">Connect With Me</a>
         </div>
       </section>
 

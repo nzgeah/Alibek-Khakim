@@ -34,7 +34,7 @@ export default function Navbar() {
       <div className="nav-links">
         <NavLink to="/" className={({isActive}) => isActive ? 'active' : ''}>Home</NavLink>
         <NavLink to="/projects" className={({isActive}) => isActive ? 'active' : ''}>Projects</NavLink>
-        <NavLink to="/contact" className={({isActive}) => isActive ? 'active' : ''}>Contact</NavLink>
+        <NavLink to="/contact" className={({isActive}) => isActive ? 'active' : ''}>Connect</NavLink>
         
         <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
           {isDark ? <Sun size={20} /> : <Moon size={20} />}
