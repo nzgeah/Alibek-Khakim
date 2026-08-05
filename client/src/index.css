@@ -431,11 +431,15 @@ a:hover { color: var(--secondary); }
   margin-bottom: 0;
   padding: 16px 0;
   border-bottom-color: var(--border-color);
+  position: sticky;
+  top: 0;
+  background: var(--bg-color);
+  z-index: 10;
 }
 .nav-links a { font-size: 0.9rem; }
 .nav-links a:hover, .nav-links a.active { color: var(--secondary); }
 .logo-mark { border-radius: 4px; background: var(--text-color); color: var(--bg-color); }
-.profile-logo { border-color: var(--border-color); border-radius: 4px; box-shadow: none; }
+.profile-logo { border-color: var(--border-color); border-radius: 50%; box-shadow: none; }
 .theme-toggle:hover { background: #1b222c; }
 
 .hero {
@@ -471,7 +475,7 @@ a:hover { color: var(--secondary); }
 .site-footer { margin-top: 48px; padding: 28px 0 18px; border-top-color: var(--border-color); font-size: 0.85rem; }
 .footer-socials { gap: 10px; }
 .footer-socials a { padding: 8px; border-color: var(--border-color); border-radius: 4px; background: transparent; }
-.footer-socials a:hover { background: #1b222c; color: var(--secondary); box-shadow: none; filter: none; }
+.footer-socials a:hover { background: #1b222c; color: var(--secondary); box-shadow: none; filter: drop-shadow(0 0 7px currentColor); }
 
 [data-theme="light"] .hero, [data-theme="light"] .tech-stack { background: #fff; }
 [data-theme="light"] .tech-stack { border-color: #cbd3df; }
