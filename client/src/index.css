@@ -483,6 +483,9 @@ a:hover { color: var(--secondary); }
 [data-theme="light"] .tech-group h3 { color: #17233d; }
 [data-theme="light"] .tech-badge { border-color: #cbd3df; color: #334155; }
 [data-theme="light"] .tech-badge:hover { background: #f1f5f9; color: #17233d; border-color: #64748b; }
+[data-theme="light"] .theme-toggle:hover { background: #e9edf3; }
+[data-theme="light"] .btn-outline:hover { background: #e9edf3; color: var(--text-color); }
+[data-theme="light"] .footer-socials a:hover { background: #e9edf3; color: var(--secondary); }
 
 @media (max-width: 640px) {
   .hero { margin: 24px 0 48px; padding: 46px 24px; border-radius: 4px; }
