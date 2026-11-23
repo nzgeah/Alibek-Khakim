@@ -1,16 +1,18 @@
-// Small interface sounds, synthesised with Web Audio (no audio files).
+// Small interface sounds in an 8-bit, old-console style, synthesised with
+// Web Audio (no audio files): pulse-wave blips with hard on/off edges, like
+// a retro RPG menu. The tunes are original, not taken from any game.
 //
 // Rules that keep them from being annoying:
 // - they only play in answer to a click or a choice the visitor made, plus
 //   one short chime when they press start; never on hover,
 //   scroll or the background animation;
-// - they are short and quiet (clicks under 0.15s, the chime under a second);
+// - they are short and quiet (clicks under 0.15s, the fanfare under a second);
 // - one switch in the navbar turns them off, and the choice is remembered.
 
 type SoundName = 'click' | 'toggle';
 
 const STORAGE_KEY = 'sound';
-const VOLUME = 0.05;
+const VOLUME = 0.035; // pulse waves are bright, so they run quieter
 const MIN_GAP_MS = 70; // never stack sounds closer than this
 
 let context: AudioContext | null = null;
@@ -24,15 +26,43 @@ export function setSoundEnabled(value: boolean) {
   localStorage.setItem(STORAGE_KEY, value ? 'on' : 'off');
 }
 
-/** One soft note: a triangle wave with a quick fade-out. */
-function note(ctx: AudioContext, frequency: number, start: number, duration: number) {
+// A 25% pulse wave: the thin, buzzy lead voice of 8-bit consoles.
+let pulseWave: PeriodicWave | null = null;
+function getPulseWave(ctx: AudioContext): PeriodicWave {
+  if (!pulseWave) {
+    const harmonics = 32;
+    const duty = 0.25;
+    const real = new Float32Array(harmonics + 1);
+    const imag = new Float32Array(harmonics + 1);
+    for (let n = 1; n <= harmonics; n++) {
+      real[n] = (2 / (n * Math.PI)) * Math.sin(n * Math.PI * duty);
+    }
+    pulseWave = ctx.createPeriodicWave(real, imag);
+  }
+  return pulseWave;
+}
+
+/**
+ * One chip note: full volume straight away, held, then cut. The few
+ * milliseconds of fade at the end only prevent an audible pop.
+ */
+function note(
+  ctx: AudioContext,
+  frequency: number,
+  start: number,
+  duration: number,
+  voice: 'pulse' | 'triangle' = 'pulse',
+) {
   const oscillator = ctx.createOscillator();
   const gain = ctx.createGain();
-  oscillator.type = 'triangle';
+  if (voice === 'pulse') oscillator.setPeriodicWave(getPulseWave(ctx));
+  else oscillator.type = 'triangle';
   oscillator.frequency.setValueAtTime(frequency, start);
-  gain.gain.setValueAtTime(0, start);
-  gain.gain.linearRampToValueAtTime(VOLUME, start + 0.005);
-  gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+  // The triangle is the soft bass voice, so it can sit a little louder.
+  const level = voice === 'pulse' ? VOLUME : VOLUME * 1.6;
+  gain.gain.setValueAtTime(level, start);
+  gain.gain.setValueAtTime(level, start + duration - 0.012);
+  gain.gain.linearRampToValueAtTime(0, start + duration);
   oscillator.connect(gain).connect(ctx.destination);
   oscillator.start(start);
   oscillator.stop(start + duration + 0.01);
@@ -51,10 +81,14 @@ export function playSound(name: SoundName) {
     if (context.state === 'suspended') void context.resume();
     const t = context.currentTime;
     if (name === 'click') {
-      note(context, 620, t, 0.07);
+      // Menu "select": one high blip with a tiny upward flick.
+      note(context, 987.77, t, 0.03);
+      note(context, 1318.5, t + 0.03, 0.04);
     } else {
-      note(context, 520, t, 0.06);
-      note(context, 780, t + 0.06, 0.08);
+      // Switch flipped: three quick steps up.
+      note(context, 659.25, t, 0.04);
+      note(context, 880, t + 0.04, 0.04);
+      note(context, 1174.7, t + 0.08, 0.06);
     }
   } catch {
     // No audio support: stay silent.
@@ -62,7 +96,7 @@ export function playSound(name: SoundName) {
 }
 
 /**
- * A soft rising chime for the moment the visitor presses start.
+ * A short 8-bit fanfare for the moment the visitor presses start.
  *
  * Browsers refuse to play sound until the visitor has interacted with the
  * page, which is why this is called from the Press Start click. If it is
@@ -78,12 +112,16 @@ export async function playReadyChime() {
     }
     if (context.state !== 'running') return;
     lastPlayed = performance.now();
-    // C major arpeggio: C5, E5, G5, C6, the last note ringing a little longer.
+    // A fast arpeggio racing up two octaves (C5 E5 G5 C6 E6), landing on a
+    // held G6, with a triangle bass note under each half.
     const t = context.currentTime + 0.02;
-    note(context, 523.25, t, 0.16);
-    note(context, 659.25, t + 0.09, 0.16);
-    note(context, 783.99, t + 0.18, 0.18);
-    note(context, 1046.5, t + 0.27, 0.45);
+    const step = 0.065;
+    [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((frequency, i) => {
+      note(context!, frequency, t + i * step, step);
+    });
+    note(context, 1567.98, t + 5 * step, 0.3);
+    note(context, 130.81, t, 5 * step, 'triangle');
+    note(context, 196, t + 5 * step, 0.3, 'triangle');
   } catch {
     // No audio support: stay silent.
   }
