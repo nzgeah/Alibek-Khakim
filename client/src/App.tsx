@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { BrowserRouter, Link, Route, Routes, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import SocialLinks from './components/SocialLinks';
+import Starfield from './components/Starfield';
 import { useLanguage } from './i18n/context';
 import LanguageProvider from './i18n/LanguageProvider';
 import AdminDashboard from './pages/AdminDashboard';
@@ -68,6 +69,7 @@ function Shell() {
   return (
     <BrowserRouter>
       <ScrollManager />
+      <Starfield />
       <div className="app-shell">
         <Navbar />
         <main>
