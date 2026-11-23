@@ -16,6 +16,7 @@
   --accent: #65d4b5;
   --accent-text: #06120f;
   --error: #f87171;
+  --sweep: #4d8dff;
   --radius: 10px;
   --font-sans: "Pixelify Sans Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: "Bitcount Single", "Pixelify Sans Variable", ui-sans-serif, system-ui, sans-serif;
@@ -49,6 +50,7 @@
   --accent: #0f766e;
   --accent-text: #ffffff;
   --error: #b91c1c;
+  --sweep: #1d5fe0;
 }
 
 *, *::before, *::after {
@@ -370,6 +372,24 @@ main {
   vertical-align: -0.08em;
   background: var(--accent);
   animation: caret-blink 1s steps(1) infinite;
+}
+
+/* One letter at a time turns blue, travelling left to right. Each letter
+   waits its turn (--i x 0.1s); a full pass takes 4s, so the highlight sits
+   on a letter for 2.5% of the cycle = 0.1s. */
+.sweep-letter {
+  animation: letter-sweep 4s steps(1) infinite;
+  animation-delay: calc(var(--i) * 0.1s);
+}
+
+@keyframes letter-sweep {
+  0% {
+    color: var(--sweep);
+  }
+  2.5%,
+  100% {
+    color: inherit;
+  }
 }
 
 @keyframes caret-blink {
@@ -775,5 +795,9 @@ th {
 
   .caret {
     display: none;
+  }
+
+  .sweep-letter {
+    animation: none;
   }
 }

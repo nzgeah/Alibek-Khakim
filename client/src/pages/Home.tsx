@@ -32,7 +32,7 @@ export default function Home() {
       <section className="hero">
         <p className="label">{t.roles.join(' · ')}</p>
         <h1>
-          <Typed text={t.greeting} shown={greetingShown} caret={!greetingDone} />
+          <Typed text={t.greeting} shown={greetingShown} caret={!greetingDone} sweep />
         </h1>
         <p className="lead">
           <Typed text={t.intro} shown={introShown} caret={greetingDone} />

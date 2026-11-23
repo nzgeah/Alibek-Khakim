@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { appReady } from './ready';
 
 export interface TypedLine {
   text: string;
@@ -29,6 +30,7 @@ export function useTypewriter(lines: TypedLine[]): { counts: number[]; finished:
     let line = 0;
     let shown = 0;
     let timer: ReturnType<typeof setTimeout>;
+    let cancelled = false;
 
     const tick = () => {
       shown += 1;
@@ -50,8 +52,14 @@ export function useTypewriter(lines: TypedLine[]): { counts: number[]; finished:
       }
     };
 
-    timer = setTimeout(tick, 300);
-    return () => clearTimeout(timer);
+    // Start typing only once the loading screen is gone.
+    appReady.then(() => {
+      if (!cancelled) timer = setTimeout(tick, 400);
+    });
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [play, script]);
 
   return { counts, finished };
