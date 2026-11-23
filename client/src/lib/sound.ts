@@ -4,7 +4,8 @@
 //
 // Rules that keep them from being annoying:
 // - they only play in answer to a click or a choice the visitor made, plus
-//   one short chime when they press start; never on hover,
+//   a fanfare when they press start and the typing of the greeting right
+//   after it; never on hover,
 //   scroll or the background animation;
 // - they are short and quiet (clicks under 0.15s, the fanfare under a second);
 // - one switch in the navbar turns them off, and the choice is remembered.
@@ -14,10 +15,12 @@ type SoundName = 'click' | 'toggle';
 const STORAGE_KEY = 'sound';
 const VOLUME = 0.035; // pulse waves are bright, so they run quieter
 const MIN_GAP_MS = 70; // never stack sounds closer than this
+const TALK_GAP_MS = 55; // typing blips: at most about 18 a second
 
 let context: AudioContext | null = null;
 let enabled = localStorage.getItem(STORAGE_KEY) !== 'off';
 let lastPlayed = 0;
+let lastTalk = 0;
 
 export const isSoundEnabled = () => enabled;
 
@@ -52,6 +55,7 @@ function note(
   start: number,
   duration: number,
   voice: 'pulse' | 'triangle' = 'pulse',
+  loudness = 1,
 ) {
   const oscillator = ctx.createOscillator();
   const gain = ctx.createGain();
@@ -59,7 +63,7 @@ function note(
   else oscillator.type = 'triangle';
   oscillator.frequency.setValueAtTime(frequency, start);
   // The triangle is the soft bass voice, so it can sit a little louder.
-  const level = voice === 'pulse' ? VOLUME : VOLUME * 1.6;
+  const level = (voice === 'pulse' ? VOLUME : VOLUME * 1.6) * loudness;
   gain.gain.setValueAtTime(level, start);
   gain.gain.setValueAtTime(level, start + duration - 0.012);
   gain.gain.linearRampToValueAtTime(0, start + duration);
@@ -92,6 +96,25 @@ export function playSound(name: SoundName) {
     }
   } catch {
     // No audio support: stay silent.
+  }
+}
+
+/**
+ * The "talking" blip of retro RPG dialogue: one short low note per letter as
+ * text types out. Fast text would turn into a buzz, so blips are spaced out
+ * and letters in between stay silent. Spaces and punctuation are silent too,
+ * which gives the speech its rhythm.
+ */
+export function playTalkBlip(character: string | undefined) {
+  if (!enabled || !context || context.state !== 'running') return;
+  if (!character || !/[\p{L}\p{N}]/u.test(character)) return;
+  const now = performance.now();
+  if (now - lastTalk < TALK_GAP_MS) return;
+  lastTalk = now;
+  try {
+    note(context, 440, context.currentTime, 0.035, 'pulse', 0.6);
+  } catch {
+    // Stay silent.
   }
 }
 

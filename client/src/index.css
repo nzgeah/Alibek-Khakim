@@ -93,6 +93,42 @@ html {
   scroll-padding-top: 88px;
 }
 
+/* Scrollbar: a square, bevelled block in the accent colour on a dark rail,
+   like an old game window. Chromium and Safari get the full pixel look;
+   Firefox only supports colours and width. */
+::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+}
+
+::-webkit-scrollbar-thumb {
+  border: 3px solid var(--surface);
+  border-left-width: 4px;
+  background: var(--accent);
+  /* Light top-left and dark bottom-right edges make the block look raised. */
+  box-shadow:
+    inset 2px 2px 0 rgba(255, 255, 255, 0.35),
+    inset -2px -2px 0 rgba(0, 0, 0, 0.35);
+}
+
+::-webkit-scrollbar-thumb:hover,
+::-webkit-scrollbar-thumb:active {
+  background: var(--sweep);
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) var(--surface);
+  }
+}
+
 body {
   margin: 0;
   min-width: 320px;

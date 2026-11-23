@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { appStarted } from './ready';
+import { playTalkBlip } from './sound';
 
 export interface TypedLine {
   text: string;
@@ -37,6 +38,7 @@ export function useTypewriter(lines: TypedLine[]): { counts: number[]; finished:
       const current = line;
       const visible = shown;
       setCounts((prev) => prev.map((n, i) => (i === current ? visible : n)));
+      playTalkBlip(script[current].text[visible - 1]);
 
       if (shown < script[line].text.length) {
         timer = setTimeout(tick, script[line].speed);
@@ -54,7 +56,8 @@ export function useTypewriter(lines: TypedLine[]): { counts: number[]; finished:
 
     // Start typing only once the visitor has pressed start.
     appStarted.then(() => {
-      if (!cancelled) timer = setTimeout(tick, 400);
+      // Leave room for the start fanfare to finish before the talking begins.
+      if (!cancelled) timer = setTimeout(tick, 800);
     });
     return () => {
       cancelled = true;
