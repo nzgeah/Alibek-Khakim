@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { appReady } from './ready';
+import { appStarted } from './ready';
 
 export interface TypedLine {
   text: string;
@@ -52,8 +52,8 @@ export function useTypewriter(lines: TypedLine[]): { counts: number[]; finished:
       }
     };
 
-    // Start typing only once the loading screen is gone.
-    appReady.then(() => {
+    // Start typing only once the visitor has pressed start.
+    appStarted.then(() => {
       if (!cancelled) timer = setTimeout(tick, 400);
     });
     return () => {

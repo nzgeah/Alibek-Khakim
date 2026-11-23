@@ -1,9 +1,10 @@
 // Small interface sounds, synthesised with Web Audio (no audio files).
 //
 // Rules that keep them from being annoying:
-// - they only ever play in answer to a click or a choice the visitor made,
-//   never on load, hover, scroll or the background animation;
-// - they are short (under 0.15s) and quiet;
+// - they only play in answer to a click or a choice the visitor made, plus
+//   one short chime when they press start; never on hover,
+//   scroll or the background animation;
+// - they are short and quiet (clicks under 0.15s, the chime under a second);
 // - one switch in the navbar turns them off, and the choice is remembered.
 
 type SoundName = 'click' | 'toggle';
@@ -55,6 +56,34 @@ export function playSound(name: SoundName) {
       note(context, 520, t, 0.06);
       note(context, 780, t + 0.06, 0.08);
     }
+  } catch {
+    // No audio support: stay silent.
+  }
+}
+
+/**
+ * A soft rising chime for the moment the visitor presses start.
+ *
+ * Browsers refuse to play sound until the visitor has interacted with the
+ * page, which is why this is called from the Press Start click. If it is
+ * blocked anyway it stays silent rather than playing late.
+ */
+export async function playReadyChime() {
+  if (!enabled) return;
+  try {
+    context ??= new AudioContext();
+    if (context.state !== 'running') {
+      const refused = new Promise<void>((resolve) => setTimeout(resolve, 250));
+      await Promise.race([context.resume(), refused]);
+    }
+    if (context.state !== 'running') return;
+    lastPlayed = performance.now();
+    // C major arpeggio: C5, E5, G5, C6, the last note ringing a little longer.
+    const t = context.currentTime + 0.02;
+    note(context, 523.25, t, 0.16);
+    note(context, 659.25, t + 0.09, 0.16);
+    note(context, 783.99, t + 0.18, 0.18);
+    note(context, 1046.5, t + 0.27, 0.45);
   } catch {
     // No audio support: stay silent.
   }

@@ -65,23 +65,77 @@
           opacity: 0.15;
         }
       }
+      /* "Press Start": shown once loading is done. The click is also what
+         lets the browser play the welcome chime. */
+      #loader-start {
+        padding: 14px 22px;
+        border: 2px solid currentColor;
+        border-radius: 6px;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        font-family: var(--font-display, ui-monospace, Consolas, monospace);
+        font-size: clamp(0.8rem, 2.4vw, 1.1rem);
+        line-height: 1.5;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        cursor: pointer;
+        animation: loader-blink 1.1s steps(1) infinite;
+      }
+      /* The button is focused automatically (any key starts), so it keeps
+         blinking while focused; only hovering fills it in. */
+      #loader-start:focus {
+        outline: none;
+      }
+      #loader-start:hover {
+        background: currentColor;
+        animation: none;
+      }
+      #loader-start:hover span {
+        color: #0b0f14;
+      }
+      [data-theme='light'] #loader-start:hover span {
+        color: #f7f8fc;
+      }
+      #loader [hidden] {
+        display: none;
+      }
+      @keyframes loader-blink {
+        0%,
+        60% {
+          opacity: 1;
+        }
+        61%,
+        100% {
+          opacity: 0.25;
+        }
+      }
       @media (prefers-reduced-motion: reduce) {
-        #loader i {
+        #loader i,
+        #loader-start {
           animation: none;
         }
       }
     </style>
   </head>
   <body>
-    <div id="loader" role="status">
-      <span><span id="loader-text">Loading</span><i>.</i><i>.</i><i>.</i></span>
+    <div id="loader">
+      <span id="loader-status" role="status"
+        ><span id="loader-text">Loading</span><i>.</i><i>.</i><i>.</i></span
+      >
+      <button id="loader-start" type="button" data-sound="none" hidden>
+        <span id="loader-start-text">Press Start</span>
+      </button>
     </div>
     <script>
       // Loading text in the visitor's language.
       try {
-        var words = { ru: 'Загрузка', kk: 'Жүктелуде' };
+        var words = { ru: ['Загрузка', 'Нажмите старт'], kk: ['Жүктелуде', 'Бастау үшін басыңыз'] };
         var l = localStorage.getItem('lang') || navigator.language.slice(0, 2).toLowerCase();
-        if (words[l]) document.getElementById('loader-text').textContent = words[l];
+        if (words[l]) {
+          document.getElementById('loader-text').textContent = words[l][0];
+          document.getElementById('loader-start-text').textContent = words[l][1];
+        }
       } catch (e) {}
     </script>
     <div id="root"></div>
