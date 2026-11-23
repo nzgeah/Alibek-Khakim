@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { localizeProject, useLanguage } from '../i18n/context';
 import { imageUrl, type Project } from '../lib/api';
 
 /** Cover image, or a generated placeholder with the project's initials. */
@@ -21,7 +22,9 @@ export function ProjectCover({ project }: { project: Project }) {
   );
 }
 
-export default function ProjectCard({ project }: { project: Project }) {
+export default function ProjectCard({ project: source }: { project: Project }) {
+  const { t } = useLanguage();
+  const project = localizeProject(source, t);
   return (
     <article className="project-card">
       <ProjectCover project={project} />
@@ -41,7 +44,7 @@ export default function ProjectCard({ project }: { project: Project }) {
           ))}
         </ul>
         <span className="card-more" aria-hidden="true">
-          View project <ArrowRight size={16} />
+          {t.viewProject} <ArrowRight size={16} />
         </span>
       </div>
     </article>

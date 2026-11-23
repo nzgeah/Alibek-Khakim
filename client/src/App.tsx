@@ -2,7 +2,8 @@ import { useEffect } from 'react';
 import { BrowserRouter, Link, Route, Routes, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import SocialLinks from './components/SocialLinks';
-import { site } from './config/site';
+import { useLanguage } from './i18n/context';
+import LanguageProvider from './i18n/LanguageProvider';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminLogin from './pages/AdminLogin';
 import Home from './pages/Home';
@@ -40,18 +41,20 @@ function ScrollManager() {
 }
 
 function NotFound() {
+  const { t } = useLanguage();
   return (
     <div className="container page">
-      <h1>Page not found</h1>
-      <p className="lead">There is nothing at this address.</p>
+      <h1>{t.pageNotFound}</h1>
+      <p className="lead">{t.pageNotFoundLead}</p>
       <Link to="/" className="btn btn-outline">
-        Back to home
+        {t.backHome}
       </Link>
     </div>
   );
 }
 
-export default function App() {
+function Shell() {
+  const { t } = useLanguage();
   return (
     <BrowserRouter>
       <ScrollManager />
@@ -70,12 +73,20 @@ export default function App() {
         <footer className="site-footer">
           <div className="container footer-inner">
             <p>
-              © {new Date().getFullYear()} {site.name}
+              © {new Date().getFullYear()} {t.name}
             </p>
             <SocialLinks variant="icons" />
           </div>
         </footer>
       </div>
     </BrowserRouter>
+  );
+}
+
+export default function App() {
+  return (
+    <LanguageProvider>
+      <Shell />
+    </LanguageProvider>
   );
 }

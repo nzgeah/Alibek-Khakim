@@ -1,0 +1,58 @@
+import { useEffect, useState } from 'react';
+
+export interface TypedLine {
+  text: string;
+  /** Milliseconds per character. */
+  speed: number;
+}
+
+// The animation plays once per page load, not on every return to the home page.
+let hasPlayed = false;
+
+/**
+ * Types several lines one after another. `counts` is how many characters of
+ * each line are visible; once `finished` is true, show the lines in full
+ * (the text may have changed since, e.g. after a language switch). Skipped
+ * when the user prefers reduced motion. The lines are read once, on mount.
+ */
+export function useTypewriter(lines: TypedLine[]): { counts: number[]; finished: boolean } {
+  const [play] = useState(
+    () => !hasPlayed && !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  );
+  const [script] = useState(lines);
+  const [counts, setCounts] = useState<number[]>(() => script.map(() => 0));
+  const [finished, setFinished] = useState(!play);
+
+  useEffect(() => {
+    if (!play) return;
+
+    let line = 0;
+    let shown = 0;
+    let timer: ReturnType<typeof setTimeout>;
+
+    const tick = () => {
+      shown += 1;
+      const current = line;
+      const visible = shown;
+      setCounts((prev) => prev.map((n, i) => (i === current ? visible : n)));
+
+      if (shown < script[line].text.length) {
+        timer = setTimeout(tick, script[line].speed);
+        return;
+      }
+      line += 1;
+      shown = 0;
+      if (line < script.length) {
+        timer = setTimeout(tick, 350);
+      } else {
+        hasPlayed = true;
+        setFinished(true);
+      }
+    };
+
+    timer = setTimeout(tick, 300);
+    return () => clearTimeout(timer);
+  }, [play, script]);
+
+  return { counts, finished };
+}

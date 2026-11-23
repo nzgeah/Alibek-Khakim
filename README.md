@@ -24,10 +24,14 @@ In development the client looks for it at `http://localhost:5000`.
 
 | What | Where |
 | --- | --- |
-| Name, intro, about text, social links, CV link | `client/src/config/site.ts` |
-| Tech stack | `client/src/config/site.ts` |
-| Projects (without the server) | `client/src/data/projects.ts` |
-| Colours and layout | `client/src/index.css` |
+| All text in English, Russian and Kazakh (name, intro, about, project descriptions, buttons) | `client/src/i18n/translations.ts` |
+| Social links, CV link, tech stack | `client/src/config/site.ts` |
+| Projects (without the server): links, technologies, images | `client/src/data/projects.ts` |
+| Colours, fonts and layout | `client/src/index.css` |
+
+The language switch is in the navbar. A new project needs an entry in
+`projects.ts` plus its texts under the same id in `translations.ts`, once per
+language.
 
 To add a CV, put the file at `client/public/resume.pdf` and set `resumeUrl` to
 `'/resume.pdf'` — the "Download CV" button appears on its own.

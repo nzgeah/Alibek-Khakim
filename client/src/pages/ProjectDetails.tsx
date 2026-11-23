@@ -2,12 +2,15 @@ import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, Code, ExternalLink } from 'lucide-react';
 import { ProjectCover } from '../components/ProjectCard';
+import { localizeProject, useLanguage } from '../i18n/context';
 import { getProject, imageUrl, type Project } from '../lib/api';
 
 export default function ProjectDetails() {
   const { id } = useParams<{ id: string }>();
   // undefined = loading, null = not found
-  const [project, setProject] = useState<Project | null | undefined>(undefined);
+  const { t } = useLanguage();
+  const [loaded, setProject] = useState<Project | null | undefined>(undefined);
+  const project = loaded && localizeProject(loaded, t);
 
   useEffect(() => {
     setProject(undefined);
@@ -18,7 +21,7 @@ export default function ProjectDetails() {
     return (
       <div className="container page">
         <p className="muted" role="status">
-          Loading…
+          {t.loading}
         </p>
       </div>
     );
@@ -27,10 +30,10 @@ export default function ProjectDetails() {
   if (project === null) {
     return (
       <div className="container page">
-        <h1>Project not found</h1>
-        <p className="lead">It may have been removed or renamed.</p>
+        <h1>{t.projectNotFound}</h1>
+        <p className="lead">{t.projectNotFoundLead}</p>
         <Link to="/projects" className="btn btn-outline">
-          <ArrowLeft size={18} /> Back to projects
+          <ArrowLeft size={18} /> {t.backToProjects}
         </Link>
       </div>
     );
@@ -39,7 +42,7 @@ export default function ProjectDetails() {
   return (
     <article className="container page">
       <Link to="/projects" className="text-link">
-        <ArrowLeft size={16} /> All projects
+        <ArrowLeft size={16} /> {t.allProjects}
       </Link>
 
       <header className="page-head">
@@ -51,7 +54,7 @@ export default function ProjectDetails() {
         <div className="actions">
           {project.liveDemoLink && (
             <a href={project.liveDemoLink} target="_blank" rel="noopener noreferrer" className="btn">
-              <ExternalLink size={18} /> Live demo
+              <ExternalLink size={18} /> {t.liveDemo}
             </a>
           )}
           {project.githubLink && (
@@ -61,7 +64,7 @@ export default function ProjectDetails() {
               rel="noopener noreferrer"
               className={project.liveDemoLink ? 'btn btn-outline' : 'btn'}
             >
-              <Code size={18} /> Source code
+              <Code size={18} /> {t.sourceCode}
             </a>
           )}
         </div>
@@ -76,11 +79,11 @@ export default function ProjectDetails() {
         </div>
 
         <div className="prose">
-          <h2>About this project</h2>
+          <h2>{t.aboutProject}</h2>
           {project.fullDescription.split(/\n{2,}/).map((paragraph) => (
             <p key={paragraph}>{paragraph}</p>
           ))}
-          <h2>Built with</h2>
+          <h2>{t.builtWith}</h2>
           <ul className="badges">
             {project.technologies.map((tech) => (
               <li key={tech} className="badge">

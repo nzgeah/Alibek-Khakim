@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import ProjectCard from '../components/ProjectCard';
+import { useLanguage } from '../i18n/context';
 import { getProjects, type Project } from '../lib/api';
 
 export default function Projects() {
+  const { t } = useLanguage();
   const [projects, setProjects] = useState<Project[] | null>(null);
   const [filter, setFilter] = useState<string | null>(null);
 
@@ -19,27 +21,27 @@ export default function Projects() {
   return (
     <div className="container page">
       <header className="page-head">
-        <h1>Projects</h1>
-        <p className="lead">A collection of my recent work.</p>
+        <h1>{t.projectsTitle}</h1>
+        <p className="lead">{t.projectsLead}</p>
       </header>
 
       {projects === null ? (
         <p className="muted" role="status">
-          Loading projects…
+          {t.loadingProjects}
         </p>
       ) : projects.length === 0 ? (
-        <p className="muted">No projects published yet.</p>
+        <p className="muted">{t.noProjects}</p>
       ) : (
         <>
           {technologies.length > 1 && (
-            <div className="filters" role="group" aria-label="Filter by technology">
+            <div className="filters" role="group" aria-label={t.filterLabel}>
               <button
                 type="button"
                 className="chip"
                 aria-pressed={filter === null}
                 onClick={() => setFilter(null)}
               >
-                All
+                {t.filterAll}
               </button>
               {technologies.map((tech) => (
                 <button
