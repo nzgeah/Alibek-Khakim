@@ -60,18 +60,19 @@ function makeStars(width: number, height: number): Star[] {
   return stars;
 }
 
-/** A comet that falls steeply through one of the side margins. */
-function makeComet(width: number, margin: number): Comet {
-  const left = Math.random() < 0.5;
-  const speed = random(240, 380);
-  // Mostly downward, leaning slightly left or right.
-  const lean = random(-0.3, 0.3);
-  const x = random(margin * 0.25, margin * 0.75);
+/**
+ * A comet that crosses the whole screen on a shallow diagonal: from the top
+ * left corner down to the right, or from the top right down to the left.
+ */
+function makeComet(width: number, height: number): Comet {
+  const fromLeft = Math.random() < 0.5;
+  const speed = random(520, 700);
+  const angle = random(0.19, 0.33); // 11 to 19 degrees below horizontal
   return {
-    x: left ? x : width - margin + x,
-    y: -40,
-    vx: Math.sin(lean) * speed,
-    vy: Math.cos(lean) * speed,
+    x: fromLeft ? -40 : width + 40,
+    y: random(height * 0.02, height * 0.14),
+    vx: Math.cos(angle) * speed * (fromLeft ? 1 : -1),
+    vy: Math.sin(angle) * speed,
     life: 8,
   };
 }
@@ -79,7 +80,8 @@ function makeComet(width: number, margin: number): Comet {
 /**
  * Fixed full-screen canvas behind the page: twinkling pixel stars in the side
  * margins and, on screens wide enough to have margins, an occasional comet
- * falling through one of them.
+ * crossing diagonally. The comet is hidden behind the content column, so it
+ * shows in one margin, disappears, and comes out in the other.
  */
 export default function Starfield() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -134,13 +136,13 @@ export default function Starfield() {
         }
       }
 
-      // Comets live in the side margins only; without margins there are none.
+      // Comets show in the side margins only; without margins there are none.
       const margin = (width - CONTENT_WIDTH) / 2;
       if (still || margin < 40) return;
 
       if (!comet) {
         nextComet -= dt;
-        if (nextComet <= 0) comet = makeComet(width, margin);
+        if (nextComet <= 0) comet = makeComet(width, height);
         return;
       }
 
@@ -153,7 +155,7 @@ export default function Starfield() {
       const ux = comet.vx / length;
       const uy = comet.vy / length;
       const segments = 14;
-      // Never draw over the content column, even if the comet leans into it.
+      // Never draw over the content column: the comet passes behind it.
       ctx.save();
       ctx.beginPath();
       ctx.rect(0, 0, margin - 8, height);
