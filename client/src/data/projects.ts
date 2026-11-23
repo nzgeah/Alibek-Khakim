@@ -11,7 +11,12 @@ const entries: Omit<Project, 'title' | 'status' | 'shortDescription' | 'fullDesc
   {
     id: 'spacebird',
     technologies: ['Godot 4', 'GDScript'],
-    images: ['/projects/spacebird-menu.png', '/projects/spacebird-space.png', '/projects/spacebird-crafting.png'],
+    images: [
+      '/projects/spacebird-space.png',
+      '/projects/spacebird-hangar.png',
+      '/projects/spacebird-room.png',
+      '/projects/spacebird-crafting.png',
+    ],
     githubLink: 'https://github.com/nzgeah/spacebird',
     isFeatured: true,
   },
