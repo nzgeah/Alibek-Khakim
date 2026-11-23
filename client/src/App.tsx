@@ -12,30 +12,40 @@ import Projects from './pages/Projects';
 
 /** Scrolls to the #hash target after navigation, or to the top of a new page. */
 function ScrollManager() {
-  const { pathname, hash } = useLocation();
+  const { pathname, search, hash, key } = useLocation();
 
   useEffect(() => {
     if (!hash) {
       window.scrollTo(0, 0);
       return;
     }
+    // Drop the #section from the address once it has been used, so reloading
+    // the page opens it at the top instead of jumping back to that section.
+    window.history.replaceState(window.history.state, '', pathname + search);
+
     const scrollToTarget = (behavior: ScrollBehavior) =>
       document.getElementById(hash.slice(1))?.scrollIntoView({ behavior });
 
     // Wait a frame so the target page has rendered.
     const frame = requestAnimationFrame(() => scrollToTarget('smooth'));
     // Content that loads late (the project list) shifts the layout; keep the
-    // target in place for a moment instead of landing above it.
+    // target in place for a moment instead of landing above it. Stop as soon
+    // as the visitor scrolls on their own.
     const observer = new ResizeObserver(() => scrollToTarget('instant'));
+    const stopFollowing = () => observer.disconnect();
     const settle = setTimeout(() => observer.observe(document.body), 700);
-    const stop = setTimeout(() => observer.disconnect(), 6000);
+    const stop = setTimeout(stopFollowing, 4000);
+    const userEvents = ['wheel', 'touchmove', 'keydown', 'mousedown'] as const;
+    userEvents.forEach((name) => window.addEventListener(name, stopFollowing, { passive: true }));
     return () => {
       cancelAnimationFrame(frame);
       clearTimeout(settle);
       clearTimeout(stop);
-      observer.disconnect();
+      stopFollowing();
+      userEvents.forEach((name) => window.removeEventListener(name, stopFollowing));
     };
-  }, [pathname, hash]);
+    // `key` changes on every navigation, so clicking Contact twice works.
+  }, [pathname, search, hash, key]);
 
   return null;
 }
