@@ -1,115 +1,95 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, ExternalLink, Code } from 'lucide-react';
-
-interface Project {
-  id: string;
-  title: string;
-  fullDescription: string;
-  images: string[];
-  technologies: string[];
-  status: string;
-  githubLink: string;
-  liveDemoLink: string;
-  myRole: string;
-}
+import { Link, useParams } from 'react-router-dom';
+import { ArrowLeft, Code, ExternalLink } from 'lucide-react';
+import { ProjectCover } from '../components/ProjectCard';
+import { getProject, imageUrl, type Project } from '../lib/api';
 
 export default function ProjectDetails() {
   const { id } = useParams<{ id: string }>();
-  const [project, setProject] = useState<Project | null>(null);
-  const [loading, setLoading] = useState(true);
+  // undefined = loading, null = not found
+  const [project, setProject] = useState<Project | null | undefined>(undefined);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/projects/${id}`)
-      .then(res => {
-        if (!res.ok) throw new Error('Not found');
-        return res.json();
-      })
-      .then(data => {
-        setProject(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error(err);
-        setLoading(false);
-      });
+    setProject(undefined);
+    if (id) getProject(id).then(setProject);
   }, [id]);
 
-  if (loading) return <div className="container"><p>Loading...</p></div>;
-  if (!project) return <div className="container"><p>Project not found.</p></div>;
+  if (project === undefined) {
+    return (
+      <div className="container page">
+        <p className="muted" role="status">
+          Loading…
+        </p>
+      </div>
+    );
+  }
+
+  if (project === null) {
+    return (
+      <div className="container page">
+        <h1>Project not found</h1>
+        <p className="lead">It may have been removed or renamed.</p>
+        <Link to="/projects" className="btn btn-outline">
+          <ArrowLeft size={18} /> Back to projects
+        </Link>
+      </div>
+    );
+  }
 
   return (
-    <div className="container">
-      <Link to="/projects" className="btn btn-outline mb-8" style={{ display: 'inline-flex' }}>
-        <ArrowLeft size={20} /> Back to Projects
+    <article className="container page">
+      <Link to="/projects" className="text-link">
+        <ArrowLeft size={16} /> All projects
       </Link>
-      
-      <div className="grid md:grid-cols-2 gap-8">
-        <div>
-          {project.images && project.images.length > 0 ? (
-            <div className="flex-col flex gap-4">
-              <img 
-                src={`http://localhost:5000${project.images[0]}`} 
-                alt={project.title} 
-                style={{ width: '100%', borderRadius: '12px', objectFit: 'cover' }}
-              />
-              <div className="grid grid-cols-2 gap-4">
-                {project.images.slice(1).map((img, idx) => (
-                  <img 
-                    key={idx}
-                    src={`http://localhost:5000${img}`} 
-                    alt={`${project.title} - ${idx}`} 
-                    style={{ width: '100%', borderRadius: '8px', objectFit: 'cover' }}
-                  />
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="card flex items-center justify-center" style={{ height: '300px' }}>
-              <p className="text-muted">No images available</p>
-            </div>
+
+      <header className="page-head">
+        <p className="label">
+          {[project.status, project.myRole].filter(Boolean).join(' · ')}
+        </p>
+        <h1>{project.title}</h1>
+        <p className="lead">{project.shortDescription}</p>
+        <div className="actions">
+          {project.liveDemoLink && (
+            <a href={project.liveDemoLink} target="_blank" rel="noopener noreferrer" className="btn">
+              <ExternalLink size={18} /> Live demo
+            </a>
+          )}
+          {project.githubLink && (
+            <a
+              href={project.githubLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={project.liveDemoLink ? 'btn btn-outline' : 'btn'}
+            >
+              <Code size={18} /> Source code
+            </a>
           )}
         </div>
+      </header>
 
-        <div>
-          <h1 className="mb-4">{project.title}</h1>
-          <div className="flex flex-wrap gap-2 mb-6">
-            <span style={{ padding: '4px 12px', borderRadius: '16px', border: '1px solid var(--border-color)', fontSize: '0.875rem' }}>
-              Status: {project.status}
-            </span>
-            {project.myRole && (
-              <span style={{ padding: '4px 12px', borderRadius: '16px', border: '1px solid var(--border-color)', fontSize: '0.875rem' }}>
-                Role: {project.myRole}
-              </span>
-            )}
-          </div>
+      <div className="details">
+        <div className="gallery">
+          <ProjectCover project={project} />
+          {project.images.slice(1).map((src) => (
+            <img key={src} className="project-cover" src={imageUrl(src)} alt="" loading="lazy" />
+          ))}
+        </div>
 
-          <div className="flex gap-4 mb-8">
-            {project.liveDemoLink && (
-              <a href={project.liveDemoLink} target="_blank" rel="noopener noreferrer" className="btn">
-                <ExternalLink size={20} /> Live Demo
-              </a>
-            )}
-            {project.githubLink && (
-              <a href={project.githubLink} target="_blank" rel="noopener noreferrer" className="btn btn-outline">
-                <Code size={20} /> Source Code
-              </a>
-            )}
-          </div>
-
-          <h3 className="mb-2">Technologies Used</h3>
-          <div className="flex flex-wrap gap-2 mb-8">
-            {project.technologies.map(tech => (
-              <span key={tech} className="text-sm font-bold" style={{ background: 'var(--primary)', color: 'var(--surface)', padding: '4px 12px', borderRadius: '16px' }}>
+        <div className="prose">
+          <h2>About this project</h2>
+          {project.fullDescription.split(/\n{2,}/).map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
+          ))}
+          <h2>Built with</h2>
+          <ul className="badges">
+            {project.technologies.map((tech) => (
+              <li key={tech} className="badge">
                 {tech}
-              </span>
+              </li>
             ))}
-          </div>
-
-          <h3 className="mb-2">About This Project</h3>
-          <p style={{ whiteSpace: 'pre-wrap' }}>{project.fullDescription}</p>
+          </ul>
         </div>
       </div>
-    </div>
+    </article>
   );
 }

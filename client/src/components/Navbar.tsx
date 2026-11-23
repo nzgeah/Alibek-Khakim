@@ -1,54 +1,53 @@
 import { Link, NavLink } from 'react-router-dom';
 import { Moon, Sun } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { site } from '../config/site';
+
+type Theme = 'dark' | 'light';
+
+function initialTheme(): Theme {
+  const saved = localStorage.getItem('theme');
+  if (saved === 'light' || saved === 'dark') return saved;
+  return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+}
 
 export default function Navbar() {
-  const [isDark, setIsDark] = useState(true);
+  const [theme, setTheme] = useState<Theme>(initialTheme);
 
   useEffect(() => {
-    const theme = localStorage.getItem('theme');
-    if (theme !== 'light') {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      setIsDark(true);
-    } else {
-      document.documentElement.setAttribute('data-theme', 'light');
-      setIsDark(false);
-    }
-  }, []);
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
 
   const toggleTheme = () => {
-    if (isDark) {
-      document.documentElement.setAttribute('data-theme', 'light');
-      localStorage.setItem('theme', 'light');
-      setIsDark(false);
-    } else {
-      document.documentElement.setAttribute('data-theme', 'dark');
-      localStorage.setItem('theme', 'dark');
-      setIsDark(true);
-    }
-  };
-
-  const scrollToConnect = (e: React.MouseEvent) => {
-    e.preventDefault();
-    window.dispatchEvent(new Event('connect-scroll-requested'));
-    document.getElementById('connect')?.scrollIntoView({ behavior: 'smooth' });
+    const next = theme === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('theme', next);
+    setTheme(next);
   };
 
   return (
-    <nav className="navbar container">
-      <Link to="/" className="font-bold text-xl" style={{ color: 'var(--primary)' }}>
-        <img className="profile-logo" src="/profile-logo.jpg" alt="Profile" />
-      </Link>
-      
-      <div className="nav-links">
-        <NavLink to="/" className={({isActive}) => isActive ? 'active' : ''}>Home</NavLink>
-        <NavLink to="/projects" className={({isActive}) => isActive ? 'active' : ''}>Projects</NavLink>
-        <a href="#connect" onClick={scrollToConnect}>Connect</a>
-        
-        <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
-          {isDark ? <Sun size={20} /> : <Moon size={20} />}
-        </button>
-      </div>
-    </nav>
+    <header className="navbar">
+      <nav className="container navbar-inner" aria-label="Main">
+        <Link to="/" className="brand">
+          <img src="/profile-logo.jpg" alt="" width="32" height="32" />
+          <span>{site.name}</span>
+        </Link>
+
+        <div className="nav-links">
+          <NavLink to="/" end>
+            Home
+          </NavLink>
+          <NavLink to="/projects">Projects</NavLink>
+          <Link to="/#connect">Contact</Link>
+          <button
+            type="button"
+            className="theme-toggle"
+            onClick={toggleTheme}
+            aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+          >
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+        </div>
+      </nav>
+    </header>
   );
 }

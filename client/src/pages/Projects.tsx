@@ -1,60 +1,66 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-
-interface Project {
-  id: string;
-  title: string;
-  shortDescription: string;
-  images: string[];
-  technologies: string[];
-}
+import { useEffect, useMemo, useState } from 'react';
+import ProjectCard from '../components/ProjectCard';
+import { getProjects, type Project } from '../lib/api';
 
 export default function Projects() {
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<Project[] | null>(null);
+  const [filter, setFilter] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/projects')
-      .then(res => res.json())
-      .then(data => setProjects(data))
-      .catch(err => console.error(err));
+    getProjects().then(setProjects);
   }, []);
 
+  const technologies = useMemo(
+    () => [...new Set((projects ?? []).flatMap((p) => p.technologies))].sort(),
+    [projects],
+  );
+  const visible = (projects ?? []).filter((p) => !filter || p.technologies.includes(filter));
+
   return (
-    <div className="container">
-      <h2>My Projects</h2>
-      <p className="text-muted mt-2 mb-8">A collection of some of my recent work.</p>
-      
-      <div className="grid md:grid-cols-2 lg:grid-cols-3">
-        {projects.length === 0 ? (
-          <p>Loading projects...</p>
-        ) : (
-          projects.map(project => (
-            <div key={project.id} className="card flex-col flex justify-between">
-              <div>
-                {project.images && project.images[0] && (
-                  <img 
-                    src={`http://localhost:5000${project.images[0]}`} 
-                    alt={project.title} 
-                    style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '8px', marginBottom: '16px' }}
-                  />
-                )}
-                <h3 className="mt-2">{project.title}</h3>
-                <p className="text-muted mt-2">{project.shortDescription}</p>
-                <div className="flex flex-wrap gap-2 mt-4 mb-4">
-                  {project.technologies.map(tech => (
-                    <span key={tech} className="text-sm" style={{ background: 'var(--border-color)', padding: '2px 8px', borderRadius: '12px' }}>
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              <Link to={`/projects/${project.id}`} className="btn btn-outline" style={{ textAlign: 'center' }}>
-                View Details
-              </Link>
+    <div className="container page">
+      <header className="page-head">
+        <h1>Projects</h1>
+        <p className="lead">A collection of my recent work.</p>
+      </header>
+
+      {projects === null ? (
+        <p className="muted" role="status">
+          Loading projects…
+        </p>
+      ) : projects.length === 0 ? (
+        <p className="muted">No projects published yet.</p>
+      ) : (
+        <>
+          {technologies.length > 1 && (
+            <div className="filters" role="group" aria-label="Filter by technology">
+              <button
+                type="button"
+                className="chip"
+                aria-pressed={filter === null}
+                onClick={() => setFilter(null)}
+              >
+                All
+              </button>
+              {technologies.map((tech) => (
+                <button
+                  key={tech}
+                  type="button"
+                  className="chip"
+                  aria-pressed={filter === tech}
+                  onClick={() => setFilter(filter === tech ? null : tech)}
+                >
+                  {tech}
+                </button>
+              ))}
             </div>
-          ))
-        )}
-      </div>
+          )}
+          <div className="project-grid">
+            {visible.map((project) => (
+              <ProjectCard key={project.id} project={project} />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }

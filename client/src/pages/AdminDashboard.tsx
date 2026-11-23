@@ -1,17 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-interface Project {
-  id: string;
-  title: string;
-  status: string;
-  isFeatured: boolean;
-}
+import { apiUrl, type Project } from '../lib/api';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
+  const [error, setError] = useState('');
   const token = localStorage.getItem('admin_token');
+
+  const fetchProjects = useCallback(async () => {
+    try {
+      const res = await fetch(apiUrl('/api/projects'));
+      if (!res.ok) throw new Error();
+      setProjects(await res.json());
+      setError('');
+    } catch {
+      setError('Could not load projects. Is the API running?');
+    }
+  }, []);
 
   useEffect(() => {
     if (!token) {
@@ -19,65 +25,87 @@ export default function AdminDashboard() {
       return;
     }
     fetchProjects();
-  }, [token, navigate]);
-
-  const fetchProjects = async () => {
-    try {
-      const res = await fetch('http://localhost:5000/api/projects');
-      if (res.ok) {
-        setProjects(await res.json());
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  }, [token, navigate, fetchProjects]);
 
   const handleLogout = () => {
     localStorage.removeItem('admin_token');
     navigate('/admin/login');
   };
 
-  return (
-    <div className="container">
-      <div className="flex justify-between items-center mb-8">
-        <h2>Admin Dashboard</h2>
-        <button onClick={handleLogout} className="btn btn-outline">Logout</button>
-      </div>
+  const handleDelete = async (project: Project) => {
+    if (!window.confirm(`Delete "${project.title}"? This cannot be undone.`)) return;
+    try {
+      const res = await fetch(apiUrl(`/api/projects/${project.id}`), {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.status === 401) return handleLogout();
+      if (!res.ok) throw new Error();
+      fetchProjects();
+    } catch {
+      setError(`Could not delete "${project.title}".`);
+    }
+  };
 
-      <div className="card">
-        <div className="flex justify-between items-center mb-4">
-          <h3>Projects</h3>
-          <button className="btn">Add New Project</button>
+  return (
+    <div className="container page">
+      <header className="section-head">
+        <h1>Admin dashboard</h1>
+        <button type="button" onClick={handleLogout} className="btn btn-outline">
+          Log out
+        </button>
+      </header>
+
+      {error && (
+        <p className="error" role="alert">
+          {error}
+        </p>
+      )}
+
+      <section className="panel">
+        <div className="section-head">
+          <h2>Projects</h2>
+          <button type="button" className="btn" disabled title="Not implemented yet">
+            Add new project
+          </button>
         </div>
-        
+
         {projects.length === 0 ? (
-          <p className="text-muted">No projects found.</p>
+          <p className="muted">No projects in the database yet.</p>
         ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
-                <th style={{ padding: '12px' }}>Title</th>
-                <th style={{ padding: '12px' }}>Status</th>
-                <th style={{ padding: '12px' }}>Featured</th>
-                <th style={{ padding: '12px' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {projects.map(p => (
-                <tr key={p.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <td style={{ padding: '12px' }}>{p.title}</td>
-                  <td style={{ padding: '12px' }}>{p.status}</td>
-                  <td style={{ padding: '12px' }}>{p.isFeatured ? 'Yes' : 'No'}</td>
-                  <td style={{ padding: '12px' }} className="flex gap-2">
-                    <button className="btn btn-outline" style={{ padding: '6px 12px' }}>Edit</button>
-                    <button className="btn" style={{ padding: '6px 12px', backgroundColor: 'var(--error)' }}>Delete</button>
-                  </td>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Status</th>
+                  <th>Featured</th>
+                  <th>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {projects.map((p) => (
+                  <tr key={p.id}>
+                    <td>{p.title}</td>
+                    <td>{p.status}</td>
+                    <td>{p.isFeatured ? 'Yes' : 'No'}</td>
+                    <td>
+                      <div className="actions">
+                        <button type="button" className="btn btn-outline btn-small" disabled title="Not implemented yet">
+                          Edit
+                        </button>
+                        <button type="button" className="btn btn-danger btn-small" onClick={() => handleDelete(p)}>
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
-      </div>
+      </section>
     </div>
   );
 }
