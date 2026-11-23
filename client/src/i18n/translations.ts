@@ -25,6 +25,8 @@ const en = {
   language: 'Language',
   toLight: 'Switch to light theme',
   toDark: 'Switch to dark theme',
+  soundOff: 'Turn sounds off',
+  soundOn: 'Turn sounds on',
 
   viewWork: 'View my work',
   getInTouch: 'Get in touch',
@@ -122,6 +124,8 @@ const ru: Dictionary = {
   language: 'Язык',
   toLight: 'Включить светлую тему',
   toDark: 'Включить тёмную тему',
+  soundOff: 'Выключить звуки',
+  soundOn: 'Включить звуки',
 
   viewWork: 'Смотреть работы',
   getInTouch: 'Связаться',
@@ -209,6 +213,8 @@ const kk: Dictionary = {
   language: 'Тіл',
   toLight: 'Жарық тақырыпқа ауысу',
   toDark: 'Қараңғы тақырыпқа ауысу',
+  soundOff: 'Дыбыстарды өшіру',
+  soundOn: 'Дыбыстарды қосу',
 
   viewWork: 'Жұмыстарымды көру',
   getInTouch: 'Байланысу',

@@ -1,8 +1,9 @@
 import { Link, NavLink } from 'react-router-dom';
-import { Moon, Sun } from 'lucide-react';
+import { Moon, Sun, Volume2, VolumeX } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useLanguage } from '../i18n/context';
 import { LANGUAGES, type Lang } from '../i18n/translations';
+import { isSoundEnabled, playSound, setSoundEnabled } from '../lib/sound';
 
 type Theme = 'dark' | 'light';
 
@@ -15,6 +16,7 @@ function initialTheme(): Theme {
 export default function Navbar() {
   const { lang, setLang, t } = useLanguage();
   const [theme, setTheme] = useState<Theme>(initialTheme);
+  const [sound, setSound] = useState(isSoundEnabled);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -24,6 +26,14 @@ export default function Navbar() {
     const next = theme === 'dark' ? 'light' : 'dark';
     localStorage.setItem('theme', next);
     setTheme(next);
+  };
+
+  const toggleSound = () => {
+    const next = !sound;
+    setSoundEnabled(next);
+    setSound(next);
+    // Confirm with a sound only when turning them on.
+    if (next) playSound('toggle');
   };
 
   return (
@@ -55,7 +65,18 @@ export default function Navbar() {
           <button
             type="button"
             className="theme-toggle"
+            onClick={toggleSound}
+            aria-label={sound ? t.soundOff : t.soundOn}
+            aria-pressed={sound}
+            data-sound="none"
+          >
+            {sound ? <Volume2 size={18} /> : <VolumeX size={18} />}
+          </button>
+          <button
+            type="button"
+            className="theme-toggle"
             onClick={toggleTheme}
+            data-sound="toggle"
             aria-label={theme === 'dark' ? t.toLight : t.toDark}
           >
             {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}

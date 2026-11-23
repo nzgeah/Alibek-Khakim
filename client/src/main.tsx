@@ -6,6 +6,7 @@ import '@fontsource/tiny5'
 import './index.css'
 import App from './App.tsx'
 import { appReady, hideLoader } from './lib/ready'
+import { initSounds } from './lib/sound'
 
 // Browsers put a reloaded page back where it was scrolled. With the loading
 // screen and typing intro that lands the visitor mid-page, so always start
@@ -19,3 +20,4 @@ createRoot(document.getElementById('root')!).render(
 )
 
 appReady.then(hideLoader)
+initSounds()

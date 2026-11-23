@@ -822,7 +822,23 @@ th {
   }
 
   .nav-links a {
-    padding: 8px;
+    padding: 8px 5px;
+    font-size: 0.85rem;
+  }
+
+  .theme-toggle,
+  .lang-select {
+    margin-left: 2px;
+  }
+
+  .theme-toggle {
+    width: 34px;
+    height: 34px;
+  }
+
+  .lang-select {
+    height: 34px;
+    padding: 0 2px;
   }
 }
 
