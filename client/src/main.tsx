@@ -6,7 +6,7 @@ import '@fontsource/tiny5'
 import './index.css'
 import App from './App.tsx'
 import { appReady, showStart } from './lib/ready'
-import { initSounds, playReadyChime } from './lib/sound'
+import { initSounds, playStartSound } from './lib/sound'
 
 // Browsers put a reloaded page back where it was scrolled. With the loading
 // screen and typing intro that lands the visitor mid-page, so always start
@@ -19,5 +19,5 @@ createRoot(document.getElementById('root')!).render(
   </StrictMode>,
 )
 
-appReady.then(() => showStart(() => void playReadyChime()))
+appReady.then(() => showStart(() => void playStartSound()))
 initSounds()

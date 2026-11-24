@@ -4,10 +4,10 @@
 //
 // Rules that keep them from being annoying:
 // - they only play in answer to a click or a choice the visitor made, plus
-//   a fanfare when they press start and the typing of the greeting right
+//   a flicker when they press start and the typing of the greeting right
 //   after it; never on hover,
 //   scroll or the background animation;
-// - they are short and quiet (clicks under 0.15s, the fanfare under a second);
+// - they are short and quiet (clicks under 0.15s, the start flicker a quarter of a second);
 // - one switch in the navbar turns them off, and the choice is remembered.
 
 type SoundName = 'click' | 'toggle';
@@ -118,14 +118,47 @@ export function playTalkBlip(character: string | undefined) {
   }
 }
 
+// Crunchy 8-bit noise: random values held for several samples each, which
+// gives the gritty hiss of an old console's noise channel.
+let noiseBuffer: AudioBuffer | null = null;
+function getNoise(ctx: AudioContext): AudioBuffer {
+  if (!noiseBuffer) {
+    const length = Math.floor(ctx.sampleRate * 0.2);
+    noiseBuffer = ctx.createBuffer(1, length, ctx.sampleRate);
+    const data = noiseBuffer.getChannelData(0);
+    const hold = 10;
+    let value = 0;
+    for (let i = 0; i < length; i++) {
+      if (i % hold === 0) value = Math.random() * 2 - 1;
+      data[i] = value;
+    }
+  }
+  return noiseBuffer;
+}
+
+/** One burst of noise, switched on and off as abruptly as a chip note. */
+function noise(ctx: AudioContext, start: number, duration: number, loudness = 1) {
+  const source = ctx.createBufferSource();
+  const gain = ctx.createGain();
+  source.buffer = getNoise(ctx);
+  const level = VOLUME * 1.5 * loudness;
+  gain.gain.setValueAtTime(level, start);
+  gain.gain.setValueAtTime(level, start + duration - 0.008);
+  gain.gain.linearRampToValueAtTime(0, start + duration);
+  source.connect(gain).connect(ctx.destination);
+  source.start(start);
+  source.stop(start + duration + 0.01);
+}
+
 /**
- * A short 8-bit fanfare for the moment the visitor presses start.
+ * The start sound: a quick flicker, three short bursts of noise over a low
+ * buzz, like a screen blinking as a retro RPG scene kicks in.
  *
  * Browsers refuse to play sound until the visitor has interacted with the
  * page, which is why this is called from the Press Start click. If it is
  * blocked anyway it stays silent rather than playing late.
  */
-export async function playReadyChime() {
+export async function playStartSound() {
   if (!enabled) return;
   try {
     context ??= new AudioContext();
@@ -135,16 +168,14 @@ export async function playReadyChime() {
     }
     if (context.state !== 'running') return;
     lastPlayed = performance.now();
-    // A fast arpeggio racing up two octaves (C5 E5 G5 C6 E6), landing on a
-    // held G6, with a triangle bass note under each half.
+    // Three blinks: each one is on for 45ms and off for 45ms.
     const t = context.currentTime + 0.02;
-    const step = 0.065;
-    [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((frequency, i) => {
-      note(context!, frequency, t + i * step, step);
-    });
-    note(context, 1567.98, t + 5 * step, 0.3);
-    note(context, 130.81, t, 5 * step, 'triangle');
-    note(context, 196, t + 5 * step, 0.3, 'triangle');
+    const on = 0.045;
+    const gap = 0.09;
+    for (let i = 0; i < 3; i++) {
+      noise(context, t + i * gap, on);
+      note(context, 110, t + i * gap, on, 'pulse', 0.8);
+    }
   } catch {
     // No audio support: stay silent.
   }

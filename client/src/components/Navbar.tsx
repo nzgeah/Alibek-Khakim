@@ -69,10 +69,12 @@ export default function Navbar() {
   return (
     <header className="navbar">
       <nav className="container navbar-inner" aria-label={t.nav.main}>
-        <Link to="/" className="brand">
+        {/* A plain link on purpose: the logo reloads the whole site from the
+            start screen, while Home only switches the page. */}
+        <a href="/" className="brand">
           <img src="/profile-logo.jpg" alt="" width="32" height="32" />
           <span>{t.name}</span>
-        </Link>
+        </a>
 
         <div className="nav-links" ref={linksRef}>
           <span className="nav-marker" ref={markerRef} aria-hidden="true" />

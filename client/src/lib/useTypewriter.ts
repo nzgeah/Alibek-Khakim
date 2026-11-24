@@ -56,7 +56,7 @@ export function useTypewriter(lines: TypedLine[]): { counts: number[]; finished:
 
     // Start typing only once the visitor has pressed start.
     appStarted.then(() => {
-      // Leave room for the start fanfare to finish before the talking begins.
+      // Leave room for the start flicker to finish before the talking begins.
       if (!cancelled) timer = setTimeout(tick, 800);
     });
     return () => {
