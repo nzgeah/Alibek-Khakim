@@ -21,9 +21,19 @@ export const API_URL: string =
 
 export const apiUrl = (path: string) => `${API_URL}${path}`;
 
-/** Uploaded images are served by the API; bundled and absolute ones are used as-is. */
+/**
+ * Address of a file from client/public. The site may be hosted in a subfolder
+ * (GitHub Pages serves it at /<repository>/), so "/photo.png" has to become
+ * "/<repository>/photo.png". Full URLs are left alone.
+ */
+export const publicUrl = (path: string) =>
+  path.startsWith('/') && !path.startsWith('//')
+    ? import.meta.env.BASE_URL + path.slice(1)
+    : path;
+
+/** Uploaded images are served by the API; bundled ones come from client/public. */
 export const imageUrl = (src: string) =>
-  src.startsWith('/uploads/') ? apiUrl(src) : src;
+  src.startsWith('/uploads/') ? apiUrl(src) : publicUrl(src);
 
 async function fetchJson<T>(path: string): Promise<T> {
   const res = await fetch(apiUrl(path), { signal: AbortSignal.timeout(4000) });

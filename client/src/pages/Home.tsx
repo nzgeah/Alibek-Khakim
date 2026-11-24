@@ -6,7 +6,7 @@ import SocialLinks from '../components/SocialLinks';
 import Typed from '../components/Typed';
 import { site, skillGroups } from '../config/site';
 import { useLanguage } from '../i18n/context';
-import { getProjects, type Project } from '../lib/api';
+import { getProjects, publicUrl, type Project } from '../lib/api';
 import { useTypewriter } from '../lib/useTypewriter';
 
 export default function Home() {
@@ -70,7 +70,7 @@ export default function Home() {
             <p key={paragraph}>{paragraph}</p>
           ))}
           {site.resumeUrl && (
-            <a href={site.resumeUrl} download className="btn btn-outline">
+            <a href={publicUrl(site.resumeUrl)} download className="btn btn-outline">
               <Download size={18} /> {t.downloadCv}
             </a>
           )}

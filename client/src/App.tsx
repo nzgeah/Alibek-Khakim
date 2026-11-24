@@ -24,7 +24,11 @@ function ScrollManager() {
     }
     // Drop the #section from the address once it has been used, so reloading
     // the page opens it at the top instead of jumping back to that section.
-    window.history.replaceState(window.history.state, '', pathname + search);
+    window.history.replaceState(
+      window.history.state,
+      '',
+      window.location.pathname + window.location.search,
+    );
 
     const scrollToTarget = (behavior: ScrollBehavior) =>
       document.getElementById(hash.slice(1))?.scrollIntoView({ behavior });
@@ -79,7 +83,8 @@ function PageTransition({ children }: { children: ReactNode }) {
 function Shell() {
   const { t } = useLanguage();
   return (
-    <BrowserRouter>
+    // The base path is "/" locally and "/<repository>/" on GitHub Pages.
+    <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, '')}>
       <ScrollManager />
       <Starfield />
       <div className="app-shell">

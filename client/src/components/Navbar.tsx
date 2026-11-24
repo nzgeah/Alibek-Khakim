@@ -3,6 +3,7 @@ import { Moon, Sun, Volume2, VolumeX } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useLanguage } from '../i18n/context';
 import { LANGUAGES, type Lang } from '../i18n/translations';
+import { publicUrl } from '../lib/api';
 import { isSoundEnabled, playSound, setSoundEnabled } from '../lib/sound';
 
 type Theme = 'dark' | 'light';
@@ -71,8 +72,8 @@ export default function Navbar() {
       <nav className="container navbar-inner" aria-label={t.nav.main}>
         {/* A plain link on purpose: the logo reloads the whole site from the
             start screen, while Home only switches the page. */}
-        <a href="/" className="brand">
-          <img src="/profile-logo.jpg" alt="" width="32" height="32" />
+        <a href={import.meta.env.BASE_URL} className="brand">
+          <img src={publicUrl('/profile-logo.jpg')} alt="" width="32" height="32" />
           <span>{t.name}</span>
         </a>
 
