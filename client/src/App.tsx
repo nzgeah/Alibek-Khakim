@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { BrowserRouter, Link, Route, Routes, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import SocialLinks from './components/SocialLinks';
@@ -17,7 +17,9 @@ function ScrollManager() {
 
   useEffect(() => {
     if (!hash) {
-      window.scrollTo(0, 0);
+      // Jump, don't glide: the new page fades in already at the top, rather
+      // than appearing scrolled down and then sliding up.
+      window.scrollTo({ top: 0, behavior: 'instant' });
       return;
     }
     // Drop the #section from the address once it has been used, so reloading
@@ -64,6 +66,16 @@ function NotFound() {
   );
 }
 
+/** Replays the entrance animation each time the page (not the #hash) changes. */
+function PageTransition({ children }: { children: ReactNode }) {
+  const { pathname } = useLocation();
+  return (
+    <main key={pathname} className="page-enter">
+      {children}
+    </main>
+  );
+}
+
 function Shell() {
   const { t } = useLanguage();
   return (
@@ -72,7 +84,7 @@ function Shell() {
       <Starfield />
       <div className="app-shell">
         <Navbar />
-        <main>
+        <PageTransition>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/projects" element={<Projects />} />
@@ -81,7 +93,7 @@ function Shell() {
             <Route path="/admin/*" element={<AdminDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </main>
+        </PageTransition>
         <footer className="site-footer">
           <div className="container footer-inner">
             <p>

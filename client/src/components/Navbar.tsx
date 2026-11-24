@@ -1,6 +1,6 @@
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Moon, Sun, Volume2, VolumeX } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useLanguage } from '../i18n/context';
 import { LANGUAGES, type Lang } from '../i18n/translations';
 import { isSoundEnabled, playSound, setSoundEnabled } from '../lib/sound';
@@ -17,6 +17,36 @@ export default function Navbar() {
   const { lang, setLang, t } = useLanguage();
   const [theme, setTheme] = useState<Theme>(initialTheme);
   const [sound, setSound] = useState(isSoundEnabled);
+  const { pathname } = useLocation();
+  const linksRef = useRef<HTMLDivElement>(null);
+  const markerRef = useRef<HTMLSpanElement>(null);
+
+  // The highlight behind the current page's link is one element that slides
+  // from link to link, instead of a background that jumps between them.
+  useLayoutEffect(() => {
+    const links = linksRef.current;
+    const marker = markerRef.current;
+    if (!links || !marker) return;
+
+    const place = () => {
+      const active = links.querySelector<HTMLElement>('a.active');
+      if (!active) {
+        marker.style.opacity = '0';
+        return;
+      }
+      marker.style.opacity = '1';
+      marker.style.width = `${active.offsetWidth}px`;
+      marker.style.height = `${active.offsetHeight}px`;
+      marker.style.transform = `translate(${active.offsetLeft}px, ${active.offsetTop}px)`;
+    };
+
+    place();
+    // Link widths change with the language, the font loading and the window.
+    const observer = new ResizeObserver(place);
+    observer.observe(links);
+    links.querySelectorAll('a').forEach((link) => observer.observe(link));
+    return () => observer.disconnect();
+  }, [pathname, lang]);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -44,7 +74,8 @@ export default function Navbar() {
           <span>{t.name}</span>
         </Link>
 
-        <div className="nav-links">
+        <div className="nav-links" ref={linksRef}>
+          <span className="nav-marker" ref={markerRef} aria-hidden="true" />
           <NavLink to="/" end>
             {t.nav.home}
           </NavLink>

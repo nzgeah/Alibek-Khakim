@@ -360,12 +360,18 @@ main {
   gap: 4px;
 }
 
+.nav-links {
+  position: relative;
+}
+
 .nav-links a {
+  position: relative;
   padding: 8px 12px;
   border-radius: 8px;
   color: var(--muted);
   font-size: 0.92rem;
   font-weight: 500;
+  transition: color 0.2s ease, background-color 0.2s ease;
 }
 
 .nav-links a:hover,
@@ -373,8 +379,36 @@ main {
   color: var(--text);
 }
 
-.nav-links a.active {
+.nav-links a:hover:not(.active) {
+  background: color-mix(in srgb, var(--surface-2) 55%, transparent);
+}
+
+/* The highlight of the current page: it slides from link to link. Its size
+   and position are set from Navbar.tsx. */
+.nav-marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 8px;
   background: var(--surface-2);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 0.32s cubic-bezier(0.3, 0.7, 0.2, 1),
+    width 0.32s cubic-bezier(0.3, 0.7, 0.2, 1),
+    opacity 0.2s ease;
+}
+
+/* A new page fades and rises into place instead of popping in. */
+.page-enter {
+  animation: page-enter 0.28s ease-out both;
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
 }
 
 .lang-select {
@@ -388,6 +422,11 @@ main {
   font: inherit;
   font-size: 0.9rem;
   cursor: pointer;
+}
+
+.lang-select,
+.theme-toggle {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .lang-select:hover {
@@ -891,7 +930,8 @@ th {
     display: none;
   }
 
-  .sweep-letter {
+  .sweep-letter,
+  .page-enter {
     animation: none;
   }
 }
