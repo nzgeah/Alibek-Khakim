@@ -4,6 +4,7 @@ import { ArrowLeft, Code, ExternalLink } from 'lucide-react';
 import { ProjectCover } from '../components/ProjectCard';
 import { localizeProject, useLanguage } from '../i18n/context';
 import { getProject, imageUrl, type Project } from '../lib/api';
+import { embedUrl } from '../lib/video';
 
 export default function ProjectDetails() {
   const { id } = useParams<{ id: string }>();
@@ -73,6 +74,29 @@ export default function ProjectDetails() {
       <div className="details">
         <div className="gallery">
           <ProjectCover project={project} />
+          {project.videos?.map((src) => {
+            const embed = embedUrl(src);
+            return embed ? (
+              <iframe
+                key={src}
+                className="project-video"
+                src={embed}
+                title={project.title}
+                loading="lazy"
+                allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                allowFullScreen
+              />
+            ) : (
+              <video
+                key={src}
+                className="project-video"
+                src={imageUrl(src)}
+                controls
+                playsInline
+                preload="metadata"
+              />
+            );
+          })}
           {project.images.slice(1).map((src) => (
             <img key={src} className="project-cover" src={imageUrl(src)} alt="" loading="lazy" />
           ))}

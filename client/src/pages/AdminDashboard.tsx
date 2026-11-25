@@ -112,12 +112,12 @@ export default function AdminDashboard() {
   const handleDelete = (project: StoredProject) => {
     if (!projects) return;
     const title = project.text.en.title;
-    if (!window.confirm(`Delete “${title}” and its images from the site?`)) return;
+    if (!window.confirm(`Delete “${title}” with its images and videos from the site?`)) return;
     void save(
       projects.filter((p) => p.id !== project.id),
       `Delete project: ${title}`,
       [],
-      project.images,
+      [...project.images, ...(project.videos ?? [])],
     );
   };
 

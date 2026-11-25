@@ -790,6 +790,15 @@ main {
   border: 1px solid var(--border);
 }
 
+.project-video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #000;
+}
+
 /* Panels, forms, tables (admin) */
 
 .panel {
@@ -897,12 +906,19 @@ main {
   list-style: none;
 }
 
+.field .actions input {
+  flex: 1;
+  min-width: 0;
+}
+
 .image-list li {
   display: grid;
   gap: 8px;
 }
 
-.image-list img {
+.image-list img,
+.image-list video,
+.image-list iframe {
   width: 100%;
   aspect-ratio: 16 / 9;
   object-fit: cover;

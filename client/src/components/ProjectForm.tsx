@@ -3,6 +3,7 @@ import type { ProjectText, StoredProject } from '../data/projects';
 import { LANGUAGES, type Lang } from '../i18n/translations';
 import { imageUrl } from '../lib/api';
 import type { NewImage } from '../lib/github';
+import { embedUrl } from '../lib/video';
 
 const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
 const EXTENSIONS: Record<string, string> = {
@@ -10,6 +11,13 @@ const EXTENSIONS: Record<string, string> = {
   'image/jpeg': 'jpg',
   'image/webp': 'webp',
   'image/gif': 'gif',
+};
+
+// GitHub is not a video host: files in a repository should stay small.
+const MAX_VIDEO_BYTES = 25 * 1024 * 1024;
+const VIDEO_EXTENSIONS: Record<string, string> = {
+  'video/mp4': 'mp4',
+  'video/webm': 'webm',
 };
 
 const emptyText = (): ProjectText => ({
@@ -50,11 +58,14 @@ export default function ProjectForm({ initial, takenIds, busy, onSave, onCancel 
   const [myRole, setMyRole] = useState(initial?.myRole ?? '');
   const [isFeatured, setIsFeatured] = useState(initial?.isFeatured ?? true);
   const [images, setImages] = useState<string[]>(initial?.images ?? []);
+  const [videos, setVideos] = useState<string[]>(initial?.videos ?? []);
+  const [videoLink, setVideoLink] = useState('');
+  // Images and videos picked in this form, still to be uploaded.
   const [newImages, setNewImages] = useState<NewImage[]>([]);
   const [removed, setRemoved] = useState<string[]>([]);
   const [error, setError] = useState('');
 
-  // Images picked in this form are not on the site yet, so their previews
+  // Files picked in this form are not on the site yet, so their previews
   // come straight from the chosen files.
   const previews = useMemo(
     () => new Map(newImages.map((image) => [image.path, URL.createObjectURL(image.file)])),
@@ -96,6 +107,47 @@ export default function ProjectForm({ initial, takenIds, busy, onSave, onCancel 
     else setRemoved((prev) => [...prev, path]);
   };
 
+  const addVideoLink = () => {
+    const link = videoLink.trim();
+    if (!link) return;
+    if (!embedUrl(link)) {
+      setError('This is not a YouTube or Vimeo video link. Copy the address of the video page.');
+      return;
+    }
+    setError('');
+    if (!videos.includes(link)) setVideos((prev) => [...prev, link]);
+    setVideoLink('');
+  };
+
+  const addVideoFiles = (event: ChangeEvent<HTMLInputElement>) => {
+    const files = [...(event.target.files ?? [])];
+    event.target.value = '';
+    const tooBig = files.find((file) => file.size > MAX_VIDEO_BYTES);
+    const wrongType = files.find((file) => !VIDEO_EXTENSIONS[file.type]);
+    if (tooBig || wrongType) {
+      setError(
+        tooBig
+          ? `"${tooBig.name}" is larger than 25 MB. Upload it to YouTube and add the link instead.`
+          : `"${wrongType!.name}" is not an MP4 or WebM video.`,
+      );
+      return;
+    }
+    setError('');
+    const stamp = Date.now().toString(36);
+    const added = files.map((file, i) => ({
+      path: `/projects/upload-${stamp}-${i}.${VIDEO_EXTENSIONS[file.type]}`,
+      file,
+    }));
+    setNewImages((prev) => [...prev, ...added]);
+    setVideos((prev) => [...prev, ...added.map((video) => video.path)]);
+  };
+
+  const removeVideo = (src: string) => {
+    setVideos((prev) => prev.filter((v) => v !== src));
+    if (previews.has(src)) setNewImages((prev) => prev.filter((file) => file.path !== src));
+    else if (src.startsWith('/projects/')) setRemoved((prev) => [...prev, src]);
+  };
+
   const makeCover = (path: string) =>
     setImages((prev) => [path, ...prev.filter((p) => p !== path)]);
 
@@ -129,6 +181,7 @@ export default function ProjectForm({ initial, takenIds, busy, onSave, onCancel 
           .map((tech) => tech.trim())
           .filter(Boolean),
         images,
+        ...(videos.length ? { videos } : {}),
         githubLink: githubLink.trim(),
         liveDemoLink: liveDemoLink.trim(),
         ...(myRole.trim() ? { myRole: myRole.trim() } : {}),
@@ -242,6 +295,64 @@ export default function ProjectForm({ initial, takenIds, busy, onSave, onCancel 
           </ul>
         )}
         <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" multiple onChange={addFiles} />
+      </div>
+
+      <div className="field">
+        <span>Videos (optional)</span>
+        {videos.length > 0 && (
+          <ul className="image-list">
+            {videos.map((src) => {
+              const embed = embedUrl(src);
+              return (
+                <li key={src}>
+                  {embed ? (
+                    <iframe src={embed} title="Video preview" loading="lazy" />
+                  ) : (
+                    <video src={previews.get(src) ?? imageUrl(src)} controls preload="metadata" />
+                  )}
+                  <div className="actions">
+                    <button
+                      type="button"
+                      className="btn btn-danger btn-small"
+                      onClick={() => removeVideo(src)}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+        <div className="actions">
+          <input
+            type="url"
+            value={videoLink}
+            onChange={(e) => setVideoLink(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                addVideoLink();
+              }
+            }}
+            placeholder="https://www.youtube.com/watch?v=…"
+            aria-label="YouTube or Vimeo link"
+          />
+          <button type="button" className="btn btn-outline btn-small" onClick={addVideoLink}>
+            Add link
+          </button>
+        </div>
+        <input
+          type="file"
+          accept="video/mp4,video/webm"
+          multiple
+          onChange={addVideoFiles}
+          aria-label="Upload video files"
+        />
+        <p className="muted hint">
+          A YouTube or Vimeo link is best for anything long. Short clips can be uploaded as MP4 or
+          WebM files, up to 25 MB each.
+        </p>
       </div>
 
       {error && (

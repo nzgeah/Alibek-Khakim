@@ -7,6 +7,7 @@ export interface Project {
   fullDescription: string;
   technologies: string[];
   images: string[];
+  videos?: string[];
   status: string;
   githubLink?: string | null;
   liveDemoLink?: string | null;

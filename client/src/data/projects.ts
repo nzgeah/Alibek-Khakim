@@ -20,6 +20,8 @@ export interface StoredProject {
   id: string;
   technologies: string[];
   images: string[];
+  /** Uploaded files (/projects/…) or YouTube / Vimeo links. */
+  videos?: string[];
   githubLink?: string;
   liveDemoLink?: string;
   myRole?: string;

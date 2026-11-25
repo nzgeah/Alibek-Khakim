@@ -26,7 +26,7 @@ In development the client looks for it at `http://localhost:5000`.
 | --- | --- |
 | Site text in English, Russian and Kazakh (name, intro, about, buttons) | `client/src/i18n/translations.ts` |
 | Social links, CV link, tech stack | `client/src/config/site.ts` |
-| Projects: texts in each language, links, technologies, images | the admin page, or `client/src/data/projects.json` |
+| Projects: texts in each language, links, technologies, images, videos | the admin page, or `client/src/data/projects.json` |
 | Colours, fonts and layout | `client/src/index.css` |
 
 The language switch is in the navbar.
@@ -34,9 +34,13 @@ The language switch is in the navbar.
 ## Admin page
 
 Open `/admin` on the site to add, edit, reorder or delete projects and upload
-their images. It has no server: it commits `client/src/data/projects.json` and
-the images in `client/public/projects/` to this repository, and the site is
-republished about a minute later.
+their images and videos. It has no server: it commits
+`client/src/data/projects.json` and the files in `client/public/projects/` to
+this repository, and the site is republished about a minute later.
+
+A video is either a YouTube or Vimeo link, shown in that site's player, or an
+uploaded MP4 or WebM file of up to 25 MB. Links are better for anything long:
+a repository is not meant to hold large videos.
 
 Signing in takes a GitHub fine-grained access token limited to this repository
 with **Contents: Read and write**. Only someone with such a token can publish;

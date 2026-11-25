@@ -19,7 +19,7 @@ export interface Repo {
   branch: string;
 }
 
-/** An image picked in the form that still has to be uploaded. */
+/** An image or video picked in the form that still has to be uploaded. */
 export interface NewImage {
   /** Address it will have on the site, e.g. /projects/my-game-1.png */
   path: string;
@@ -113,7 +113,7 @@ function toBase64(file: File): Promise<string> {
 const repoPath = (sitePath: string) => IMAGES_DIR + sitePath.slice('/projects'.length);
 
 /**
- * Saves the project list, uploads new images and deletes removed ones, all in
+ * Saves the project list, uploads new files and deletes removed ones, all in
  * a single commit, so the site is rebuilt once and never from a half-saved
  * state.
  */
@@ -147,7 +147,7 @@ export async function publish(
   }
   // Only files in the images folder are ever deleted, and only ones that no
   // project uses any more.
-  const stillUsed = new Set(projects.flatMap((p) => p.images));
+  const stillUsed = new Set(projects.flatMap((p) => [...p.images, ...(p.videos ?? [])]));
   for (const path of new Set(removedImages)) {
     if (path.startsWith('/projects/') && !stillUsed.has(path)) {
       tree.push({ path: repoPath(path), mode: '100644', type: 'blob', sha: null });
