@@ -11,6 +11,9 @@
       "/projects/spacebird-room.png",
       "/projects/spacebird-crafting.png"
     ],
+    "videos": [
+      "https://youtu.be/nD16a3JeLDI"
+    ],
     "githubLink": "https://github.com/nzgeah/spacebird",
     "liveDemoLink": "",
     "isFeatured": true,
