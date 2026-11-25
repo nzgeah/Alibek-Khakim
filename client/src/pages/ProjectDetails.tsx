@@ -8,9 +8,9 @@ import { getProject, imageUrl, type Project } from '../lib/api';
 export default function ProjectDetails() {
   const { id } = useParams<{ id: string }>();
   // undefined = loading, null = not found
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [loaded, setProject] = useState<Project | null | undefined>(undefined);
-  const project = loaded && localizeProject(loaded, t);
+  const project = loaded && localizeProject(loaded, lang);
 
   useEffect(() => {
     setProject(undefined);

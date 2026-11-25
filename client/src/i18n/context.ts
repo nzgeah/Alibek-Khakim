@@ -1,4 +1,5 @@
 import { createContext, useContext } from 'react';
+import { storedProjects, textFor } from '../data/projects';
 import type { Project } from '../lib/api';
 import { dictionaries, LANGUAGES, type Dictionary, type Lang } from './translations';
 
@@ -28,10 +29,10 @@ export function initialLang(): Lang {
 }
 
 /**
- * Bundled projects have their text in the dictionary; projects that come from
- * the API are shown as stored.
+ * Projects from projects.json carry their text in every language; projects
+ * that come from the API are shown as stored.
  */
-export function localizeProject(project: Project, t: Dictionary): Project {
-  const text = t.projects[project.id];
-  return text ? { ...project, ...text } : project;
+export function localizeProject(project: Project, lang: Lang): Project {
+  const stored = storedProjects.find((p) => p.id === project.id);
+  return stored ? { ...project, ...textFor(stored, lang) } : project;
 }

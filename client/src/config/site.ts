@@ -3,6 +3,10 @@
 import type { Dictionary } from '../i18n/translations';
 
 export const site = {
+  // The GitHub repository the admin page publishes to, as "owner/name". On
+  // GitHub Pages it is detected from the address; this is used elsewhere
+  // (for example when running the site locally).
+  repository: 'nzgeah/Alibek-Khakim',
   // Put your CV at client/public/resume.pdf and set this to '/resume.pdf'.
   resumeUrl: '',
   socials: [

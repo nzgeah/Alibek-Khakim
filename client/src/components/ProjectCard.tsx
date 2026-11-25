@@ -23,8 +23,8 @@ export function ProjectCover({ project }: { project: Project }) {
 }
 
 export default function ProjectCard({ project: source }: { project: Project }) {
-  const { t } = useLanguage();
-  const project = localizeProject(source, t);
+  const { t, lang } = useLanguage();
+  const project = localizeProject(source, lang);
   return (
     <article className="project-card">
       <ProjectCover project={project} />
